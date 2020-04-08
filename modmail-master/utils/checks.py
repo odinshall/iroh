@@ -153,30 +153,19 @@ def is_mod():
     return commands.check(predicate)
 
 
-def is_ticket_anon(bot, channel, ticketID):
-    c = bot.conn.cursor()
-    res = None
-    string = None
-    sqlVar = channel or ticketID 
-    
-    if sqlVar is None:
-        return None
-        
-    if sqlVar == channel:
-        string = 'room'
-        sqlVar = channel.id
-    elif sqlVar == ticketID:
-        string = 'ticket'
-        
-    c.execute(f"SELECT is_anon FROM tickets WHERE {string}=? AND status = 1", (sqlVar,))
-    res = c.fetchone()[0]
+def is_ticket_anon(bot, channel):
+    c = bot.conn.cursor()        
+    c.execute("SELECT is_anon FROM tickets WHERE room=?", (str(channel.id),))
+    res = c.fetchone()
+    if res:
+        res = res[0]
     return True if res == 1 else False
     
 
 def is_guild_anon(bot, guild):
     c = bot.conn.cursor()
     res = None
-    c.execute("SELECT anon FROM data WHERE guild=?", (guild.id,))
+    c.execute("SELECT anon FROM data WHERE guild=?", (str(guild.id),))
     res = c.fetchone()[0]
     if res:
         return True if res == 1 else False
